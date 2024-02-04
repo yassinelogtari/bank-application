@@ -1,11 +1,18 @@
 package com.app.bank.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.app.bank.dto.AccountDto;
+import com.app.bank.entities.Account;
+import com.app.bank.entities.mapper.AccountMapper;
 import com.app.bank.repositories.AccountRepository;
 import com.app.bank.services.AccountService;
 
+@Service
 public class AccountServiceImpl implements AccountService{
 	
 	private final AccountRepository accountRepository;
@@ -16,8 +23,33 @@ public class AccountServiceImpl implements AccountService{
 
 	@Override
 	public AccountDto createAccount(AccountDto accountDto) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Account account = AccountMapper.mapToAccount(accountDto);
+		Account accountSaved=accountRepository.save(account);
+		
+		
+		return AccountMapper.mapToAccountDto(accountSaved);
+	}
+
+	@Override
+	public AccountDto getAccountById(Long id) {
+		
+		Account account = accountRepository
+				.findById(id)
+				.orElseThrow(()-> new RuntimeException("Account not exist"));
+		
+		return  AccountMapper.mapToAccountDto(account);
+	}
+
+	@Override
+	public AccountDto depositAmount(Long id, double amount) {
+		Account account = accountRepository
+				.findById(id)
+				.orElseThrow(()-> new RuntimeException("Account not exist"));
+		double total=account.getBalance()+amount;
+		account.setBalance(total);
+		Account savedAcount=accountRepository.save(account);
+		return AccountMapper.mapToAccountDto(savedAcount);
 	}
 
 }
